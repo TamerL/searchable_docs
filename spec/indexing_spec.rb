@@ -1,35 +1,39 @@
 require 'rspec/autorun'
-require './src/week_days_numbers_tostring'
+require './src/indexing'
 
-describe 'week_days_numbers_tostring' do
-  context "when the input is a valid expression" do
-    it "returns the answer Mon-Sun when the input is 1,2,3,4,5,6,7" do
-      result = convert_to_string_from("1,2,3,4,5,6,7")
-      expect(result).to eq("Mon-Sun")
+RSpec.describe Indexing do
+  context 'Given the doc1 and doc2 are initialized already' do
+    before do
+      @doc1 = double("Document", content: 'the fox', name: 'doc1.txt')
+      @doc2 = double("Document", content: 'the puppy', name: 'doc2.txt')
+      # allow(doc1).to receive(:content).and_return("the fox")
     end
-    it "returns the answer Mon-Sun when the input is 1,2,3,6,7" do
-      result = convert_to_string_from("1,2,3,6,7")
-      expect(result).to eq("Mon-Wed, Sat, Sun")
+
+    describe '.initialize' do
+      # initialize is a class method
+      before do
+        @index = Indexing.new(@doc1,@doc2)
+      end
+
+      it 'store the documents array' do
+        expect(@index.documents).to eq([@doc1,@doc2])
+      end
+
+      it 'store the words in an array of searchable_words' do
+        expect(@index.searchable_words).to eq(['the','fox','puppy'])
+      end
+
+      it 'every document should have indexes for the words' do
+        expect(@index.indexes).to eq({"doc1.txt" => "110" , "doc2.txt" => "101"})
+      end
     end
-    it "returns the answer Mon, Wed-Sat when the input is 1,3,4,5,6" do
-      result = convert_to_string_from("1,3,4,5,6")
-      expect(result).to eq("Mon, Wed-Sat")
-    end
-    it "returns the answer Tue-Thu, Sat, Sun when the input is 2,3,4,6,7" do
-      result = convert_to_string_from("2,3,4,6,7")
-      expect(result).to eq("Tue-Thu, Sat, Sun")
-    end
-    it "returns the answer Mon, Wed, Thu, Sat, Sun when the input is 1,3,4,6,7" do
-      result = convert_to_string_from("1,3,4,6,7")
-      expect(result).to eq("Mon, Wed, Thu, Sat, Sun")
-    end
-    it "returns the answer Sun when the input is 7" do
-      result = convert_to_string_from("7")
-      expect(result).to eq("Sun")
-    end
-    it "returns the answer Mon, Sun when the input is 1,7" do
-      result = convert_to_string_from("1,7")
-      expect(result).to eq("Mon, Sun")
+
+    describe '#search_by_word' do
+      # content is instant method
+      it 'returns an array containing the documents which have the word' do
+        index = Indexing.new(@doc1,@doc2)
+        expect(index.search_by_word("the")).to eq(["doc1.txt","doc2.txt"])
+      end
     end
   end
 end

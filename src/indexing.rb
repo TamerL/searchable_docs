@@ -1,57 +1,55 @@
-DAYS_ABRV = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+class Indexing
+  attr_reader :documents
+  attr_reader :searchable_words
+  attr_reader :indexes
+  attr_reader :result
 
-def convert_to_string_from(week_days_numbers)
-  data = week_days_numbers.split(',')
-  output = convert_to_numbers(data)
-  grouped_numbers = group_numbers(output)
-  result = convert_to_range(grouped_numbers)
-  result.join(", ")
-end
-
-def convert_to_numbers(array)
-  case array.first
-  when *Array("1".."7")
-    array.map {|data_element| data_element.to_i}
-  when *DAYS_ABRV
-    array.map {|data_element| DAYS_ABRV.index(data_element)+1}
-  when *DAYS
-    array.map {|data_element| DAYS.index(data_element)+1}
+  def initialize(*documents)
+    @documents = *documents
+    @searchable_words = Indexing.build_searchable_words(@documents)
+    @indexes = Indexing.build_indexes(@documents,@searchable_words)
   end
-end
 
-def group_numbers(array)
-  result = []
-  array.each do |day_num|
-    last_result = result.pop || []
-    if last_result.length == 0 || day_num == last_result.last + 1
-      last_result << day_num
-      result << last_result
-    else
-      result << last_result
-      result << [day_num]
+
+  def self.build_searchable_words(documents)
+    searchable_words = []
+    documents.each do |doc|
+      searchable_words += doc.content.split(" ")
     end
+    searchable_words.uniq
   end
-  result
-end
 
-def convert_to_range(array)
-  iterator = 0
-  result = []
-  array.each do |nested_arr|
-    case nested_arr.length
-    when 1
-      result << get_week_name(nested_arr.last)
-    when 2
-      result << get_week_name(nested_arr.first)
-      result << get_week_name(nested_arr.last)
-    else
-      result << get_week_name(nested_arr.first) + "-" + get_week_name(nested_arr.last)
+  def self.build_indexes(documents,searchable_words)
+    indexes = {}
+    documents.each do |doc|
+      indexes[doc.name] = []
+      searchable_words.each do |word|
+        if doc.content.split(" ").include?(word)
+          indexes[doc.name] << "1"
+        else
+          indexes[doc.name] << "0"
+        end
+      end
+      indexes[doc.name] = indexes[doc.name].join
     end
+    indexes
+    # indexes.each do |k,v|
+    #   indexes[k] = v.to_i
+    # end
+    # p indexes
   end
-  result
-end
 
-def get_week_name(index)
-  DAYS_ABRV[index-1]
+  def search_by_word(word)
+    returns [] if @searchable_words.include?(word) == false
+    index = @searchable_words.index(word)
+    @result = []
+    p @indexes
+    @indexes.each do |k,v|
+      puts v
+      puts v.split('')[index]
+      @result << k if v.split('')[index] == "1"
+    end
+    p @result
+    @result
+  end
 end

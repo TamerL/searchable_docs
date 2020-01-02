@@ -13,43 +13,56 @@ class Indexing
 
   def self.build_searchable_words(documents)
     searchable_words = []
-    documents.each do |doc|
-      searchable_words += doc.content.split(" ")
+    begin
+      documents.each do |doc|
+        searchable_words += doc.content.split(" ").map do |w|
+          w.downcase
+        end
+      end
+    rescue => e
+      searchable_words = []
+      puts e.message
     end
+
     searchable_words.uniq
   end
 
   def self.build_indexes(documents,searchable_words)
+    return {} if searchable_words.empty?
+
     indexes = {}
     documents.each do |doc|
       indexes[doc.name] = []
       searchable_words.each do |word|
-        if doc.content.split(" ").include?(word)
+        if doc.content.split(" ").include?(word) || doc.content.split(" ").include?(word.capitalize)
           indexes[doc.name] << "1"
         else
           indexes[doc.name] << "0"
         end
       end
+
       indexes[doc.name] = indexes[doc.name].join
     end
-    indexes
     # indexes.each do |k,v|
     #   indexes[k] = v.to_i
     # end
-    # p indexes
+    indexes
   end
 
   def search_by_word(word)
-    returns [] if @searchable_words.include?(word) == false
-    index = @searchable_words.index(word)
+    raise "please enter a word to search for" if word== nil
+
+    downcase_word = word.downcase
+
+    return [] if @searchable_words.include?(downcase_word) == false
+
+    index = @searchable_words.index(downcase_word)
     @result = []
-    p @indexes
     @indexes.each do |k,v|
       puts v
       puts v.split('')[index]
       @result << k if v.split('')[index] == "1"
     end
-    p @result
     @result
   end
 end

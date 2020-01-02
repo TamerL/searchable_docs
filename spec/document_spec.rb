@@ -42,7 +42,7 @@ RSpec.describe Document do
 
       expect do
         @document.content
-      end.to raise_error
+      end.to raise_error("something wrong")
     end
   end
   end

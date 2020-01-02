@@ -23,14 +23,29 @@ describe Indexing do
         expect(@index.searchable_words).to eq(['the','fox','puppy'])
       end
 
-      it 'returns an empty array when document content raises an error' do
+      it 'returns an empty array when all documents content raises an error' do
         allow(@doc1).to receive(:content).and_raise("something bad hapended")
         index = Indexing.new(@doc1)
         expect(index.searchable_words).to eq([])
         expect(index.indexes).to eq({})
       end
 
-      it 'creates indexes for the passed documents related to the existence of the searchable_words' do
+      context 'when one of the document content raises an error' do
+        before do
+          allow(@doc1).to receive(:content).and_raise("something bad hapended")
+          @index_with_error_doc = Indexing.new(@doc1, @doc2)
+        end
+
+        it 'returns searchable words which are only included in the normal document' do
+          expect(@index_with_error_doc.searchable_words).to eq(['the', 'puppy'])
+        end
+
+        it 'returns the index hash having only the normal document' do
+          expect(@index_with_error_doc.indexes).to eq({"doc2.txt" => "11"})
+        end
+      end
+
+      it 'creates indexes for the passed documents mapped to the existence of the searchable_words' do
         expect(@index.indexes).to eq({"doc1.txt" => "110" , "doc2.txt" => "101"})
       end
     end

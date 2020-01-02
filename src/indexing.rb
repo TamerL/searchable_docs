@@ -13,15 +13,15 @@ class Indexing
 
   def self.build_searchable_words(documents)
     searchable_words = []
-    begin
-      documents.each do |doc|
+    documents.each do |doc|
+      begin
         searchable_words += doc.content.split(" ").map do |w|
           w.downcase
         end
+      rescue => e
+        puts e.message
+        next
       end
-    rescue => e
-      searchable_words = []
-      puts e.message
     end
 
     searchable_words.uniq
@@ -32,9 +32,17 @@ class Indexing
 
     indexes = {}
     documents.each do |doc|
+      begin
+        doc_content = doc.content.split(" ")
+      rescue => e
+        puts e.message
+        next
+      end
+
       indexes[doc.name] = []
+
       searchable_words.each do |word|
-        if doc.content.split(" ").include?(word) || doc.content.split(" ").include?(word.capitalize)
+        if doc_content.include?(word) || doc_content.include?(word.capitalize)
           indexes[doc.name] << "1"
         else
           indexes[doc.name] << "0"

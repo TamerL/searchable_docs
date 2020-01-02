@@ -19,11 +19,21 @@ describe 'search for a word in many documents' do
       expect(index.search_by_word('notfoundword')).to eq([])
     end
   end
-  context "when documents do not exit" do
+
+  context "when all documents do not exit" do
     it "returns an empty array" do
       doc1 = Document.new('/etc/tamer.txt')
       index = Indexing.new(doc1)
       expect(index.search_by_word('fox')).to eq([])
+    end
+  end
+
+  context "when one of the documents does not exit" do
+    it "still returns the name of the document where the word exists" do
+      doc1 = Document.new('/etc/tamer.txt')
+      doc2 = Document.new('/home/tamer/searchable_docs/spec/doc2.txt')
+      index = Indexing.new(doc1, doc2)
+      expect(index.search_by_word('dog')).to eq(['doc2.txt'])
     end
   end
 end
